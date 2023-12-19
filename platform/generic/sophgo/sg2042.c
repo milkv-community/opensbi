@@ -21,6 +21,17 @@
 #define SOPHGO_SG2042_TIMER_SIZE	0x10000UL
 #define SOPHGO_SG2042_TIMER_NUM		16
 
+static u32 selected_hartid = -1;
+
+static bool sophgo_sg2042_cold_boot_allowed(u32 hartid,
+					    const struct fdt_match *match)
+{
+	if (selected_hartid != -1)
+		return (selected_hartid == hartid);
+
+	return true;
+}
+
 static int sophgo_sg2042_early_init(bool cold_boot,
 				    const struct fdt_match *match)
 {
@@ -58,6 +69,7 @@ static const struct fdt_match sophgo_sg2042_match[] = {
 
 const struct platform_override sophgo_sg2042 = {
 	.match_table		= sophgo_sg2042_match,
+	.cold_boot_allowed      = sophgo_sg2042_cold_boot_allowed,
 	.early_init		= sophgo_sg2042_early_init,
 	.extensions_init	= sophgo_sg2042_extensions_init,
 };

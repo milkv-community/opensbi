@@ -20,6 +20,7 @@ struct timer_mtimer_quirks {
 	unsigned int	clint_mtime_offset;
 	bool		clint_without_mtime;
 	bool		has_64bit_mmio;
+	bool 		use_extern_domain;
 };
 
 struct timer_mtimer_node {
@@ -75,6 +76,7 @@ static int timer_mtimer_cold_init(void *fdt, int nodeoff,
 			mt->mtime_addr = mt->mtime_size = 0;
 		}
 		mt->mtimecmp_addr += quirks->clint_mtime_offset;
+		mt->use_extern_domain = quirks->use_extern_domain;
 	} else { /* RISC-V ACLINT MTIMER */
 		/* Set ACLINT MTIMER addresses */
 		mt->mtime_addr = addr[0];
@@ -148,6 +150,13 @@ static const struct timer_mtimer_quirks thead_clint_quirks = {
 	.clint_without_mtime	= true,
 };
 
+static const struct timer_mtimer_quirks thead_clint_sep_quirks = {
+	.is_clint		= true,
+	.clint_mtime_offset	= CLINT_MTIMER_OFFSET,
+	.clint_without_mtime	= true,
+	.use_extern_domain 	= true,
+};
+
 static const struct timer_mtimer_quirks thead_aclint_quirks = {
 	.has_64bit_mmio		= false,
 };
@@ -156,6 +165,8 @@ static const struct fdt_match timer_mtimer_match[] = {
 	{ .compatible = "riscv,clint0", .data = &sifive_clint_quirks },
 	{ .compatible = "sifive,clint0", .data = &sifive_clint_quirks },
 	{ .compatible = "thead,c900-clint", .data = &thead_clint_quirks },
+	{ .compatible = "thead,c900-clint-mtimer",
+	  .data = &thead_clint_sep_quirks },
 	{ .compatible = "thead,c900-aclint-mtimer",
 	  .data = &thead_aclint_quirks },
 	{ .compatible = "riscv,aclint-mtimer" },
